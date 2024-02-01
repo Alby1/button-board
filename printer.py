@@ -2,15 +2,20 @@ import curses
 
 class Printer():
     def __init__(self, stdscr):
+        stdscr.nodelay(1)
+        
         self.righe = 0
         self.height = 0
         self.stdscr = stdscr
         self.log = []
 
+        self.terminal_height()
+        
+
     def clear(self):
         self.stdscr.clear()
-        i = 10
-        sub_log = self.log[-self.height+10:]
+        i = max(10, self.righe)
+        sub_log = self.log[-self.height+i:]
         for line in sub_log:
             self.stdscr.addstr(i, 0, line)
             i += 1
@@ -26,7 +31,7 @@ class Printer():
     
     def print(self, message: str):
         self.terminal_height()
-        self.stdscr.move(0,0)
+        self.stdscr.move(self.righe,0)
         try:
             message = str(message)
             a_capi = message.count('\n')

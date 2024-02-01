@@ -18,31 +18,31 @@ def main(stdscr):
     #multiprocessing.shared_memory.SharedMemory() # https://docs.python.org/3/library/multiprocessing.shared_memory.html
 
     printer = Printer(stdscr)
-    stdscr.nodelay(1)
+
+    printer.add_log("Welcome to button board by Malbyx!")
 
     last_combo = None
     disconnected_device = [False, False] # [is it disconnected?, was it logged?]
     while 1:
         read = board.read_data()
+        printer.clear()
         if(read):
             if(disconnected_device[0] and not disconnected_device[1]):
                 printer.add_log("Device has disconnected")
                 disconnected_device[1] = True
-            printer.clear()
             if(read[0] == -1):
                 disconnected_device[0] = True
                 continue
             if(disconnected_device[0] and disconnected_device[1]):
                 printer.add_log("Device reconnected")
                 disconnected_device = [False, False]
-            printer.clear()
             getch = stdscr.getch()
             if(getch == 114):
                 combinations, plugins, board = load_requires()
                 printer.add_log("Reloaded combinations and plugins")
             if(getch == 99):
                 os.startfile(f"{os.getcwd()}\\config.json")
-            printer.clear()
+            
             #printer.print(read)
             last_active = None
             none_true = True
@@ -58,8 +58,8 @@ def main(stdscr):
                                 for p in range(2, len(combo_)):
                                     params.append(combo_[p])
                                 #multiprocessing.Process(target=getattr(plugins[combo_[0]]["plugin"], combo_[1]), args=(params,)).start()
-                                getattr(plugins[combo_[0]]["plugin"], combo_[1])(params)
-                                printer.add_log(combo)
+                                combo__ = getattr(plugins[combo_[0]]["plugin"], combo_[1])(params)
+                                printer.add_log(f"{combo}{':' if combo__ else ''}{(combo__ if combo__ else '')}")
                                 last_combo = combo
                         except Exception as e:
                             print(e)
@@ -75,6 +75,8 @@ def main(stdscr):
                                 possible_combo.append(f"{ck}: {combinations[ck]}")
                             if ck.endswith(f"-{i}"):
                                 possible_combo.append(f"{ck}: {combinations[ck]}")
+
+                        possible_combo.append("")
 
                         printer.print("\n".join(possible_combo))
 

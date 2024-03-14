@@ -6,6 +6,9 @@ import time
 import multiprocessing
 import curses
 import os
+import psutil
+import subprocess
+import pywinauto
 
 
 def main(stdscr):
@@ -16,7 +19,10 @@ def main(stdscr):
     if combinations is None and plugins is None and board is None:
         return
     #multiprocessing.shared_memory.SharedMemory() # https://docs.python.org/3/library/multiprocessing.shared_memory.html
-
+    
+    curses.use_default_colors()
+    curses.init_pair(1, -1, -1)
+    
     printer = Printer(stdscr)
 
     printer.add_log("Welcome to button board by Malbyx!")
@@ -25,7 +31,7 @@ def main(stdscr):
     disconnected_device = [False, False] # [is it disconnected?, was it logged?]
     while 1:
         read = board.read_data()
-        printer.clear()
+        printer.update()
         if(read):
             if(disconnected_device[0] and not disconnected_device[1]):
                 printer.add_log("Device has disconnected")
@@ -66,6 +72,7 @@ def main(stdscr):
                             last_combo = None
                             continue
                     else:
+                        
                         comb_keys = combinations.keys()
                         possible_combo = [f"You're pressing: {i}"]
                         for ck in comb_keys:
@@ -77,6 +84,11 @@ def main(stdscr):
                                 possible_combo.append(f"{ck}: {combinations[ck]}")
 
                         possible_combo.append("")
+
+                        printer.updated = False
+                        printer.update()
+                        # or
+                        #printer.clear_print()
 
                         printer.print("\n".join(possible_combo))
 
@@ -99,6 +111,12 @@ def load_requires():
 
     for k in plugins.keys():
         plugins[k]["plugin"] = (__import__(k)).Plugin(plugins[k])
+
+        if("process_name" in plugins[k].keys() and "process_path" in plugins[k].keys() and plugins[k]["process_name"] is not None and plugins[k]["process_path"] is not None):
+            if(plugins[k]["process_name"] not in (p.name() for p in psutil.process_iter())):
+                p = subprocess.Popen(['cmd.exe', '/c', rf'{plugins[k]["process_path"]}'])
+                time.sleep(5)
+                
 
     # https://pythonhosted.org/watchdog/quickstart.html#quickstart
 

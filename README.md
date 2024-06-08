@@ -1,3 +1,7 @@
+# 2024/06/08 update
+This is officially abandonware. Typing this just to let you know, tho I hope nobody (except for me) was actually using this software. This repo is proof of me failing as a programmer, but it's also a call to let everyone know, it's fine to have a project that went rogue. Never give up and never let yourself down.
+
+
 # button-board
 Windows program to use buttons of a controller to do actions on your computer.
 
